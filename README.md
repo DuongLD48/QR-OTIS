@@ -36,8 +36,8 @@ git commit -m "feat: Khoi tao ung dung Tao QR Van Don"
 # 4. Đổi tên nhánh chính thành main
 git branch -M main
 
-# 5. Liên kết tới repository GitHub của bạn (thay URL bằng link repo GitHub của bạn)
-git remote add origin https://github.com/<tai-khoan-github>/<ten-repo>.git
+# 5. Liên kết tới repository GitHub của bạn
+git remote add origin https://github.com/DuongLD48/QR-OTIS.git
 
 # 6. Đẩy lên GitHub
 git push -u origin main
@@ -47,14 +47,14 @@ git push -u origin main
 
 ### Bước 2: Kích hoạt GitHub Pages
 
-1. Truy cập vào kho chứa (Repository) vừa tạo trên GitHub.
-2. Nhấn vào tab **Settings** (Cài đặt) ở thanh menu trên cùng.
-3. Ở cột bên trái, chọn mục **Pages**.
+1. Truy cập vào kho chứa: **[https://github.com/DuongLD48/QR-OTIS](https://github.com/DuongLD48/QR-OTIS)**
+2. Nhấn vào tab **Settings** (Cài đặt) ở góc trên bên phải.
+3. Ở thanh menu bên trái, chọn mục **Pages**.
 4. Tại phần **Build and deployment** -> **Branch**:
    - Chọn nhánh: **`main`**
    - Chọn thư mục: **`/(root)`**
    - Nhấn **Save**.
-5. Đợi khoảng 1-2 phút, GitHub sẽ cung cấp cho bạn một đường link website có dạng:
-   👉 `https://<tai-khoan-github>.github.io/<ten-repo>/`
+5. Đợi khoảng 1-2 phút, trang web của bạn sẽ hoạt động tại địa chỉ:
+   👉 **`https://duongld48.github.io/QR-OTIS/`**
 
 Bây giờ bạn có thể lưu link này vào thanh bookmark trên điện thoại hoặc chia sẻ cho nhân viên sử dụng hàng ngày!
