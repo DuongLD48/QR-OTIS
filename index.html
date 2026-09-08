@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tạo Mã QR Vận Đơn Hàng Loạt - Bulk QR Code Generator</title>
+  <title>Tạo Mã QR Vận Đơn Hàng Loạt - Bulk Nayuki QR Generator</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -30,8 +30,8 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- QR Code Generator Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Fast & Optimal Nayuki QR Code Generator Library -->
+  <script src="qrcodegen.js"></script>
 
   <!-- jsPDF for PDF generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -40,11 +40,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
   <style>
-    /* Custom styles for clean mobile touch experience */
     .touch-callout-none {
       -webkit-touch-callout: none;
     }
-    /* Hide scrollbar for clean horizontal scrolling */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -54,11 +52,11 @@
     }
     @keyframes pulse-once {
       0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+      50% { transform: scale(1.03); }
       100% { transform: scale(1); }
     }
     .animate-pop {
-      animation: pulse-once 0.3s ease-in-out;
+      animation: pulse-once 0.25s ease-in-out;
     }
   </style>
 </head>
@@ -73,15 +71,15 @@
         </div>
         <div>
           <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">QR Vận Đơn Pro</h1>
-          <p class="text-xs text-slate-500 font-medium">Tạo & Xuất QR hàng loạt cho Zalo / In ấn</p>
+          <p class="text-xs text-slate-500 font-medium">Chuẩn Nayuki QR Engine • Version nhỏ nhất & ECC Level H</p>
         </div>
       </div>
       <div class="flex items-center space-x-1.5">
-        <button id="btnSample" type="button" class="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+        <button id="btnSample" type="button" class="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
           <span class="hidden sm:inline">Nạp dữ liệu</span> mẫu
         </button>
-        <button id="btnClear" type="button" class="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition">
+        <button id="btnClear" type="button" class="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition cursor-pointer">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span>Xóa</span>
         </button>
@@ -104,7 +102,7 @@
           <span id="badgeCount" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
             0 mã hợp lệ
           </span>
-          <button id="btnPaste" type="button" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1 bg-indigo-50/50 hover:bg-indigo-50 px-2 py-1 rounded-md transition">
+          <button id="btnPaste" type="button" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1 bg-indigo-50/50 hover:bg-indigo-50 px-2 py-1 rounded-md transition cursor-pointer">
             <i data-lucide="clipboard-paste" class="w-3.5 h-3.5"></i>
             Dán nhanh
           </button>
@@ -112,22 +110,88 @@
       </div>
 
       <div class="relative">
-        <textarea id="inputCodes" rows="5" placeholder="Dán danh sách mã vào đây, ví dụ:&#10;VNPOST192837465&#10;SPX98273645210&#10;JT88239019234&#10;GHN77283918239..." class="w-full text-sm font-mono p-3.5 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition placeholder:text-slate-400 leading-relaxed bg-slate-50/50 focus:bg-white"></textarea>
+        <textarea id="inputCodes" rows="5" placeholder="Dán danh sách mã vào đây, ví dụ:&#10;VNPOST982347102VN&#10;SPX98273645210&#10;JT88239019234&#10;GHN77283918239..." class="w-full text-sm font-mono p-3.5 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition placeholder:text-slate-400 leading-relaxed bg-slate-50/50 focus:bg-white"></textarea>
       </div>
 
-      <!-- Quick Toggles / Settings -->
-      <div class="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600">
-        <label class="flex items-center gap-2 cursor-pointer select-none">
-          <input type="checkbox" id="chkShowLabel" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
-          <span>In kèm chữ mã vận đơn dưới hình QR</span>
-        </label>
-        <div class="flex items-center justify-between sm:justify-end gap-2">
-          <span class="text-slate-500">Kích thước QR:</span>
-          <select id="selectQrSize" class="bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
-            <option value="120" selected>Nhỏ nhất (120px - Độ chịu lỗi Level H cao nhất)</option>
-            <option value="160">Tiêu chuẩn (160px)</option>
-            <option value="200">Lớn (200px)</option>
-          </select>
+      <!-- Advanced QR Configuration Panel (Matching Nayuki Parameters) -->
+      <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-3">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+          <span class="flex items-center gap-1.5 text-indigo-700">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+            Thông số tạo QR Code chuẩn (Nayuki Engine)
+          </span>
+          <span class="text-[11px] font-normal text-slate-500">Auto Alphanumeric • Min Version</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-slate-600">
+          <!-- 1. Error Correction Level -->
+          <div class="space-y-1">
+            <label class="font-semibold text-slate-700 block">Độ chịu lỗi (Error correction):</label>
+            <div class="grid grid-cols-2 gap-1 font-medium">
+              <label class="flex items-center gap-1 cursor-pointer bg-white p-1.5 rounded-lg border border-slate-200 hover:border-indigo-300">
+                <input type="radio" name="eccLevel" value="LOW" class="text-indigo-600">
+                <span>Low (7%)</span>
+              </label>
+              <label class="flex items-center gap-1 cursor-pointer bg-white p-1.5 rounded-lg border border-slate-200 hover:border-indigo-300">
+                <input type="radio" name="eccLevel" value="MEDIUM" class="text-indigo-600">
+                <span>Medium (15%)</span>
+              </label>
+              <label class="flex items-center gap-1 cursor-pointer bg-white p-1.5 rounded-lg border border-slate-200 hover:border-indigo-300">
+                <input type="radio" name="eccLevel" value="QUARTILE" class="text-indigo-600">
+                <span>Quartile (25%)</span>
+              </label>
+              <label class="flex items-center gap-1 cursor-pointer bg-indigo-50/70 text-indigo-900 font-bold p-1.5 rounded-lg border border-indigo-200 hover:border-indigo-400">
+                <input type="radio" name="eccLevel" value="HIGH" checked class="text-indigo-600">
+                <span>High (30% - Cao nhất)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 2. Scale & Border -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="numScale" class="font-semibold text-slate-700">Scale (pixels/module):</label>
+              <select id="numScale" class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <option value="4">4 px (Siêu nhỏ)</option>
+                <option value="6">6 px (Nhỏ gọn)</option>
+                <option value="8" selected>8 px (Chuẩn nét)</option>
+                <option value="10">10 px (Lớn)</option>
+              </select>
+            </div>
+            <div class="flex items-center justify-between">
+              <label for="numBorder" class="font-semibold text-slate-700">Border (Quiet zone):</label>
+              <select id="numBorder" class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <option value="1">1 module (Sát mép)</option>
+                <option value="2">2 modules (Gọn)</option>
+                <option value="4" selected>4 modules (Chuẩn ISO)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. Version Range & Boost ECC -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-slate-700">Version range:</span>
+              <span class="text-[11px] font-mono bg-white px-2 py-0.5 rounded border border-slate-200">Min=1, Max=40</span>
+            </div>
+            <label class="flex items-center gap-1.5 cursor-pointer pt-0.5">
+              <input type="checkbox" id="chkBoostEcc" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+              <span class="font-semibold text-indigo-900">Boost ECC</span>
+              <span class="text-[10px] text-slate-500">(Tự tăng ECC nếu còn dư dung lượng)</span>
+            </label>
+          </div>
+
+          <!-- 4. Text label toggle -->
+          <div class="space-y-2 flex flex-col justify-between">
+            <label class="flex items-center gap-2 cursor-pointer select-none pt-1">
+              <input type="checkbox" id="chkShowLabel" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+              <span class="font-semibold text-slate-800">In kèm chữ mã vận đơn dưới hình QR</span>
+            </label>
+            <div class="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1">
+              <i data-lucide="check" class="w-3 h-3"></i>
+              <span>Auto Alphanumeric mode</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -144,9 +208,9 @@
         <div>
           <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
             <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
-            <span>Đã tạo xong <span id="readyCount" class="text-amber-300 font-extrabold">0</span> mã QR (Độ chịu lỗi Level H)</span>
+            <span>Đã tạo xong <span id="readyCount" class="text-amber-300 font-extrabold">0</span> mã QR (Chuẩn Nayuki)</span>
           </h2>
-          <p class="text-xs text-slate-300 mt-0.5">Chọn xuất File PDF in ấn hoặc Ảnh Lưới gửi trực tiếp Zalo</p>
+          <p class="text-xs text-slate-300 mt-0.5">Xuất File PDF in ấn hoặc Ảnh Lưới tổng hợp gửi trực tiếp Zalo</p>
         </div>
       </div>
 
@@ -199,7 +263,7 @@
           <i data-lucide="grid" class="w-4 h-4 text-indigo-600"></i>
           Danh sách chi tiết từng mã QR
         </h3>
-        <span class="text-xs text-slate-500 italic">Chạm vào ảnh để phóng to / tải riêng</span>
+        <span class="text-xs text-slate-500 italic">Chạm vào ảnh để xem chi tiết / tải riêng</span>
       </div>
 
       <!-- Cards Grid -->
@@ -219,9 +283,9 @@
 
   </main>
 
-  <!-- Modal Preview Single QR -->
+  <!-- Modal Preview Single QR with Detailed Statistics -->
   <div id="modalPreview" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-xs w-full p-5 text-center shadow-2xl space-y-4 transform transition-all animate-pop">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-center shadow-2xl space-y-4 transform transition-all animate-pop">
       <div class="flex justify-between items-center pb-2 border-b border-slate-100">
         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Chi tiết mã QR</span>
         <button id="btnCloseModal" class="text-slate-400 hover:text-slate-600 p-1">
@@ -233,6 +297,7 @@
       </div>
       <div class="space-y-1">
         <p id="modalCodeText" class="text-sm font-mono font-bold text-indigo-700 break-all select-all"></p>
+        <p id="modalStatsText" class="text-[11px] font-mono text-slate-500"></p>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-2">
         <button id="btnModalCopyText" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
@@ -256,18 +321,15 @@
   <!-- Footer -->
   <footer class="mt-auto border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
     <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p>Ứng dụng chạy trực tiếp trên trình duyệt - 100% bảo mật & riêng tư.</p>
+      <p>Thuật toán Nayuki QR Engine • Version nhỏ nhất • Chịu lỗi Level H</p>
       <p class="text-slate-400">Tối ưu cho 100+ đơn/ngày • Hỗ trợ Zalo & In ấn</p>
     </div>
   </footer>
 
-  <!-- Hidden Container for generating QR Offscreen -->
-  <div id="offscreenContainer" class="hidden"></div>
-
   <!-- Main JavaScript Logic -->
   <script>
     // State management
-    let generatedItems = []; // Array of { code: string, dataUrl: string, canvas: HTMLCanvasElement }
+    let generatedItems = []; // Array of item objects
 
     // DOM Elements
     const inputCodes = document.getElementById('inputCodes');
@@ -277,13 +339,14 @@
     const btnClear = document.getElementById('btnClear');
     const btnGenerate = document.getElementById('btnGenerate');
     const chkShowLabel = document.getElementById('chkShowLabel');
-    const selectQrSize = document.getElementById('selectQrSize');
+    const numScale = document.getElementById('numScale');
+    const numBorder = document.getElementById('numBorder');
+    const chkBoostEcc = document.getElementById('chkBoostEcc');
     const exportToolbar = document.getElementById('exportToolbar');
     const readyCount = document.getElementById('readyCount');
     const resultsContainer = document.getElementById('resultsContainer');
     const qrGrid = document.getElementById('qrGrid');
     const emptyState = document.getElementById('emptyState');
-    const offscreenContainer = document.getElementById('offscreenContainer');
     const toast = document.getElementById('toast');
     const toastMsg = document.getElementById('toastMsg');
     
@@ -292,6 +355,7 @@
     const btnCloseModal = document.getElementById('btnCloseModal');
     const modalQrImgWrapper = document.getElementById('modalQrImgWrapper');
     const modalCodeText = document.getElementById('modalCodeText');
+    const modalStatsText = document.getElementById('modalStatsText');
     const btnModalCopyText = document.getElementById('btnModalCopyText');
     const btnModalDownload = document.getElementById('btnModalDownload');
     let currentModalItem = null;
@@ -335,7 +399,6 @@
         badgeCount.classList.remove('bg-indigo-50', 'text-indigo-700');
         badgeCount.classList.add('bg-slate-100', 'text-slate-600');
       }
-      // Save input to localStorage
       try {
         localStorage.setItem('saved_qr_input', inputCodes.value);
       } catch (e) {}
@@ -407,75 +470,84 @@
       generateAllQRCodes();
     });
 
-    // Create a QR Code Canvas element with optional text label below
-    // Create a QR Code Canvas element with highest error correction level (Level H)
-    function createQrCanvas(text, size = 120, showLabel = true) {
-      return new Promise((resolve) => {
-        const tempDiv = document.createElement('div');
-        offscreenContainer.appendChild(tempDiv);
+    // Helper: Map radio string to QrCode.Ecc object
+    function getSelectedEcc() {
+      const selected = document.querySelector('input[name="eccLevel"]:checked')?.value || 'HIGH';
+      switch(selected) {
+        case 'LOW': return qrcodegen.QrCode.Ecc.LOW;
+        case 'MEDIUM': return qrcodegen.QrCode.Ecc.MEDIUM;
+        case 'QUARTILE': return qrcodegen.QrCode.Ecc.QUARTILE;
+        case 'HIGH': 
+        default: return qrcodegen.QrCode.Ecc.HIGH;
+      }
+    }
 
-        new QRCode(tempDiv, {
-          text: text,
-          width: size,
-          height: size,
-          colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H // Cấp độ chịu lỗi cao nhất (Level H - phục hồi ~30% lỗi/mờ)
-        });
+    // Core: Generate QR Code Canvas using Nayuki Engine
+    function renderNayukiQr(text, options) {
+      const { eccLevel, scale, border, boostEcc, showLabel } = options;
 
-        // QRCode.js creates an img or canvas inside tempDiv
-        setTimeout(() => {
-          const rawCanvas = tempDiv.querySelector('canvas');
-          let sourceCanvas = rawCanvas;
+      // 1. Generate optimal segments (Auto-chooses Alphanumeric/Numeric/Byte for smallest size)
+      const segs = qrcodegen.QrSegment.makeSegments(text);
 
-          // If library outputted an img instead of canvas
-          if (!sourceCanvas) {
-            const rawImg = tempDiv.querySelector('img');
-            sourceCanvas = document.createElement('canvas');
-            sourceCanvas.width = size;
-            sourceCanvas.height = size;
-            const ctx = sourceCanvas.getContext('2d');
-            ctx.drawImage(rawImg, 0, 0, size, size);
+      // 2. Encode to QR Code with smallest Version (1 to 40)
+      const qr = qrcodegen.QrCode.encodeSegments(
+        segs,
+        eccLevel,
+        1,   // minVersion = 1 (Tự tìm version nhỏ nhất có thể!)
+        40,  // maxVersion = 40
+        -1,  // mask = -1 (Tự động chọn mask tối ưu nhất)
+        boostEcc // Boost ECC
+      );
+
+      // 3. Render directly onto an HTML Canvas with exact pixel precision
+      const qrDim = (qr.size + (border * 2)) * scale;
+      const textHeight = showLabel ? 28 : 0;
+      const totalWidth = qrDim;
+      const totalHeight = qrDim + textHeight;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = totalWidth;
+      canvas.height = totalHeight;
+      const ctx = canvas.getContext('2d');
+
+      // Fill white background (Light color #FFFFFF)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+      // Draw dark modules (#000000)
+      ctx.fillStyle = '#000000';
+      for (let y = 0; y < qr.size; y++) {
+        for (let x = 0; x < qr.size; x++) {
+          if (qr.getModule(x, y)) {
+            ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
           }
+        }
+      }
 
-          // Create compact polished canvas (with border & text if enabled)
-          const padding = 8; // Viền siêu nhỏ gọn
-          const textHeight = showLabel ? 26 : 0;
-          const finalCanvas = document.createElement('canvas');
-          finalCanvas.width = size + (padding * 2);
-          finalCanvas.height = size + (padding * 2) + textHeight;
+      // Draw tracking code text
+      if (showLabel) {
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const displayCode = text.length > 22 ? text.substring(0, 20) + '...' : text;
+        ctx.fillText(displayCode, totalWidth / 2, qrDim + (textHeight / 2));
+      }
 
-          const ctx = finalCanvas.getContext('2d');
+      const modeName = segs.length > 0 ? segs[0].mode.name : 'alphanumeric';
 
-          // White background
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-          // Draw QR in center
-          ctx.drawImage(sourceCanvas, padding, padding, size, size);
-
-          // Draw Text below QR
-          if (showLabel) {
-            ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Format text if too long
-            const displayCode = text.length > 22 ? text.substring(0, 20) + '...' : text;
-            ctx.fillText(displayCode, finalCanvas.width / 2, size + padding + (textHeight / 2));
-          }
-
-          const dataUrl = finalCanvas.toDataURL('image/png');
-          tempDiv.remove();
-
-          resolve({
-            code: text,
-            dataUrl: dataUrl,
-            canvas: finalCanvas
-          });
-        }, 50);
-      });
+      return {
+        code: text,
+        qr: qr,
+        version: qr.version,
+        size: qr.size,
+        eccName: qr.errorCorrectionLevel.name,
+        mask: qr.mask,
+        mode: modeName,
+        dataUrl: canvas.toDataURL('image/png'),
+        canvas: canvas,
+        stats: `Version ${qr.version} (${qr.size}x${qr.size}) • Mode: ${modeName} • ECC: ${qr.errorCorrectionLevel.name}`
+      };
     }
 
     // Main Generate Handler
@@ -487,26 +559,27 @@
       }
 
       btnGenerate.disabled = true;
-      btnGenerate.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Đang xử lý ${codes.length} mã...</span>`;
+      btnGenerate.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Đang tạo ${codes.length} mã (Nayuki Engine)...</span>`;
       lucide.createIcons();
 
-      const qrSize = parseInt(selectQrSize.value, 10) || 220;
-      const showLabel = chkShowLabel.checked;
+      const options = {
+        eccLevel: getSelectedEcc(),
+        scale: parseInt(numScale.value, 10) || 8,
+        border: parseInt(numBorder.value, 10) || 4,
+        boostEcc: chkBoostEcc.checked,
+        showLabel: chkShowLabel.checked
+      };
 
       generatedItems = [];
       qrGrid.innerHTML = '';
-      offscreenContainer.innerHTML = '';
 
-      // Process in batches for smooth UI
       for (let i = 0; i < codes.length; i++) {
-        const item = await createQrCanvas(codes[i], qrSize, showLabel);
+        const item = renderNayukiQr(codes[i], options);
         generatedItems.push(item);
       }
 
-      // Render items to grid
       renderGridItems(generatedItems);
 
-      // Show action bar & results
       readyCount.textContent = generatedItems.length;
       exportToolbar.classList.remove('hidden');
       resultsContainer.classList.remove('hidden');
@@ -516,7 +589,7 @@
       btnGenerate.innerHTML = `<i data-lucide="play" class="w-5 h-5 fill-current"></i><span>TẠO MÃ QR NGAY (${generatedItems.length} MÃ)</span>`;
       lucide.createIcons();
 
-      showToast(`Đã tạo thành công ${generatedItems.length} mã QR!`);
+      showToast(`Đã tạo thành công ${generatedItems.length} mã QR (Nayuki Engine)!`);
     }
 
     btnGenerate.addEventListener('click', generateAllQRCodes);
@@ -530,19 +603,18 @@
         card.className = 'bg-white rounded-2xl p-3 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col items-center justify-between group';
         
         card.innerHTML = `
-          <div class="w-full flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5 px-0.5">
+          <div class="w-full flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1 px-0.5">
             <span>#${index + 1}</span>
-            <button class="btn-copy-code text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5 cursor-pointer" title="Copy mã">
-              <i data-lucide="copy" class="w-3 h-3"></i> Copy
-            </button>
+            <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">v${item.version} (${item.size}x${item.size})</span>
           </div>
           
           <div class="cursor-pointer my-1 rounded-xl p-1 bg-slate-50 border border-slate-100 hover:scale-105 transition transform qr-preview-img">
-            <img src="${item.dataUrl}" alt="QR ${item.code}" class="w-full h-auto object-contain max-w-[170px] rounded-lg">
+            <img src="${item.dataUrl}" alt="QR ${item.code}" class="w-full h-auto object-contain max-w-[160px] rounded-lg">
           </div>
 
-          <div class="w-full mt-2 space-y-2">
+          <div class="w-full mt-1 space-y-1.5">
             <p class="text-xs font-mono font-bold text-slate-800 text-center truncate" title="${item.code}">${item.code}</p>
+            <p class="text-[10px] text-center text-indigo-600 font-semibold truncate">${item.eccName}</p>
             
             <div class="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-100">
               <button class="btn-copy-img w-full py-1.5 px-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-semibold rounded-lg flex items-center justify-center gap-1 transition cursor-pointer" title="Copy ảnh để dán vào Zalo">
@@ -557,16 +629,8 @@
           </div>
         `;
 
-        // Card Events
         const imgEl = card.querySelector('.qr-preview-img');
         imgEl.addEventListener('click', () => openModal(item));
-
-        const btnCopyCode = card.querySelector('.btn-copy-code');
-        btnCopyCode.addEventListener('click', (e) => {
-          e.stopPropagation();
-          navigator.clipboard.writeText(item.code);
-          showToast(`Đã chép mã: ${item.code}`);
-        });
 
         const btnCopyImg = card.querySelector('.btn-copy-img');
         btnCopyImg.addEventListener('click', async (e) => {
@@ -591,6 +655,7 @@
       currentModalItem = item;
       modalQrImgWrapper.innerHTML = `<img src="${item.dataUrl}" class="max-w-[240px] w-full rounded-lg shadow-sm">`;
       modalCodeText.textContent = item.code;
+      modalStatsText.textContent = item.stats;
       modalPreview.classList.remove('hidden');
       modalPreview.classList.add('flex');
     }
@@ -619,7 +684,7 @@
       }
     });
 
-    // Copy Image to Clipboard (For Zalo dán trực tiếp)
+    // Copy Image to Clipboard
     async function copyImageToClipboard(item) {
       try {
         const response = await fetch(item.dataUrl);
@@ -630,9 +695,8 @@
           ]);
           showToast('Đã copy ảnh! Bạn có thể dán (Paste) ngay vào Zalo');
         } else {
-          // Fallback if browser doesn't support clipboard image write
           downloadSingleQr(item);
-          showToast('Trình duyệt chưa hỗ trợ copy ảnh trực tiếp, đã tự động tải về');
+          showToast('Đã tải ảnh về để bạn gửi Zalo');
         }
       } catch (err) {
         console.error(err);
@@ -664,25 +728,22 @@
         format: 'a4'
       });
 
-      // A4 dimensions: 210mm x 297mm
       const pageWidth = 210;
       const pageHeight = 297;
       const margin = 10;
-      const cols = 4; // 4 columns
-      const rows = 6; // 6 rows = 24 QR codes per A4 sheet
+      const cols = 4;
+      const rows = 6;
       const itemsPerPage = cols * rows;
 
-      const cellWidth = (pageWidth - (margin * 2)) / cols; // ~47.5mm
-      const cellHeight = (pageHeight - (margin * 2) - 10) / rows; // ~44.5mm
-      const qrImgSize = 34; // 34mm square for QR
+      const cellWidth = (pageWidth - (margin * 2)) / cols;
+      const cellHeight = (pageHeight - (margin * 2) - 10) / rows;
+      const qrImgSize = 34;
 
-      let pageIndex = 1;
       let totalPages = Math.ceil(generatedItems.length / itemsPerPage);
 
       for (let i = 0; i < generatedItems.length; i++) {
         if (i > 0 && i % itemsPerPage === 0) {
           doc.addPage();
-          pageIndex++;
         }
 
         const item = generatedItems[i];
@@ -697,7 +758,7 @@
         doc.setDrawColor(210, 215, 220);
         doc.setLineDashPattern([1.5, 1.5], 0);
         doc.rect(x, y, cellWidth, cellHeight);
-        doc.setLineDashPattern([], 0); // reset
+        doc.setLineDashPattern([], 0);
 
         // Draw QR Image
         const qrX = x + ((cellWidth - qrImgSize) / 2);
@@ -726,7 +787,6 @@
     // HELPER: Generate Merged Sheet Canvas
     async function createSheetCanvas() {
       const count = generatedItems.length;
-      // Responsive columns: 2 cols for <= 6 items, 3 cols for <= 24 items, 4 cols for 25+
       const cols = count <= 6 ? 2 : (count <= 24 ? 3 : 4);
       const rows = Math.ceil(count / cols);
 
@@ -736,11 +796,10 @@
 
       const canvas = document.createElement('canvas');
       canvas.width = (cols * cellWidth) + (padding * 2);
-      canvas.height = (rows * cellHeight) + (padding * 2) + 60; // header banner space
+      canvas.height = (rows * cellHeight) + (padding * 2) + 60;
 
       const ctx = canvas.getContext('2d');
 
-      // White/slate background
       ctx.fillStyle = '#f8fafc';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -768,7 +827,6 @@
         const cardW = cellWidth - 16;
         const cardH = cellHeight - 16;
 
-        // Card Background
         ctx.fillStyle = '#ffffff';
         ctx.shadowColor = 'rgba(0,0,0,0.06)';
         ctx.shadowBlur = 8;
@@ -776,20 +834,17 @@
         ctx.beginPath();
         ctx.roundRect(x, y, cardW, cardH, 12);
         ctx.fill();
-        ctx.shadowColor = 'transparent'; // reset
+        ctx.shadowColor = 'transparent';
 
-        // Card Border
         ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Index Badge
         ctx.fillStyle = '#64748b';
         ctx.font = 'bold 12px monospace';
         ctx.textAlign = 'left';
-        ctx.fillText(`#${i + 1}`, x + 12, y + 22);
+        ctx.fillText(`#${i + 1} (v${item.version})`, x + 12, y + 22);
 
-        // Draw QR Image
         const img = new Image();
         img.src = item.dataUrl;
         await new Promise(r => { img.onload = r; });
