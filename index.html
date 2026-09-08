@@ -152,32 +152,58 @@
       </div>
 
       <!-- Export Grid Options -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <!-- Export PDF -->
-        <button id="btnExportPDF" type="button" class="group flex flex-col items-start p-3 bg-white/10 hover:bg-white/20 active:bg-white/25 rounded-xl border border-white/10 transition text-left cursor-pointer">
-          <div class="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm mb-1">
-            <i data-lucide="file-text" class="w-4 h-4"></i>
-            <span>Xuất File PDF In Ấn</span>
+        <button id="btnExportPDF" type="button" class="group flex flex-col justify-between p-3.5 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-xl border border-white/10 transition text-left cursor-pointer">
+          <div>
+            <div class="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm mb-1">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+              <span>Xuất File PDF In Ấn</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-snug">Dàn trang A4 (4x6 = 24 mã/trang) kèm viền cắt. Rất tiện in tem hoặc gửi file qua Zalo.</p>
           </div>
-          <p class="text-[11px] text-slate-300 leading-snug">Dàn trang A4 (4x6 mã/trang) kèm viền cắt. Tiện in tem hoặc gửi file qua Zalo.</p>
+          <div class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-300">
+            <span>Tải file PDF</span>
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+          </div>
         </button>
 
-        <!-- Export Grid Image (Sheet) -->
-        <button id="btnExportSheet" type="button" class="group flex flex-col items-start p-3 bg-white/10 hover:bg-white/20 active:bg-white/25 rounded-xl border border-white/10 transition text-left cursor-pointer">
-          <div class="flex items-center gap-2 text-emerald-300 font-bold text-xs sm:text-sm mb-1">
-            <i data-lucide="layout-grid" class="w-4 h-4"></i>
-            <span>Tạo 1 Ảnh Lưới Tổng Hợp</span>
+        <!-- Export Grid Image (Sheet) with 2 sub-actions -->
+        <div class="flex flex-col justify-between p-3.5 bg-white/10 rounded-xl border border-emerald-500/30 ring-1 ring-emerald-500/20">
+          <div>
+            <div class="flex items-center gap-2 text-emerald-300 font-bold text-xs sm:text-sm mb-1">
+              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+              <span>Ảnh Lưới Tổng Hợp</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-snug">Ghép 100 mã thành 1 ảnh bảng duy nhất gửi vào Zalo.</p>
           </div>
-          <p class="text-[11px] text-slate-300 leading-snug">Ghép tất cả mã thành 1 ảnh duy nhất để gửi ngay 1 tin nhắn vào Zalo.</p>
-        </button>
+          
+          <!-- 2 Action Buttons: Copy to Clipboard & Save to Device -->
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button id="btnCopySheet" type="button" class="py-2 px-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer" title="Copy ảnh trực tiếp vào bộ nhớ đệm để dán vào Zalo">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copy Zalo</span>
+            </button>
+            <button id="btnSaveSheet" type="button" class="py-2 px-2 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer" title="Lưu file ảnh về máy">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Lưu ảnh</span>
+            </button>
+          </div>
+        </div>
 
         <!-- Export ZIP -->
-        <button id="btnExportZIP" type="button" class="group flex flex-col items-start p-3 bg-white/10 hover:bg-white/20 active:bg-white/25 rounded-xl border border-white/10 transition text-left cursor-pointer">
-          <div class="flex items-center gap-2 text-sky-300 font-bold text-xs sm:text-sm mb-1">
-            <i data-lucide="archive" class="w-4 h-4"></i>
-            <span>Tải File Nén ZIP</span>
+        <button id="btnExportZIP" type="button" class="group flex flex-col justify-between p-3.5 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-xl border border-white/10 transition text-left cursor-pointer">
+          <div>
+            <div class="flex items-center gap-2 text-sky-300 font-bold text-xs sm:text-sm mb-1">
+              <i data-lucide="archive" class="w-4 h-4"></i>
+              <span>Tải File Nén ZIP</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-snug">Chứa tất cả các ảnh QR riêng biệt đặt tên theo từng mã vận đơn.</p>
           </div>
-          <p class="text-[11px] text-slate-300 leading-snug">Chứa tất cả các ảnh QR riêng biệt đặt tên theo từng mã vận đơn.</p>
+          <div class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-300">
+            <span>Tải file ZIP</span>
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+          </div>
         </button>
       </div>
     </div>
@@ -712,14 +738,10 @@
       showToast(`Đã xuất PDF thành công (${totalPages} trang)`);
     });
 
-    // 2. EXPORT TO SHEET IMAGE (Single Large Grid Image for 1-click Zalo share)
-    document.getElementById('btnExportSheet').addEventListener('click', async () => {
-      if (generatedItems.length === 0) return;
-
-      showToast('Đang ghép ảnh dạng lưới...');
-
+    // HELPER: Generate Merged Sheet Canvas
+    async function createSheetCanvas() {
       const count = generatedItems.length;
-      // Calculate best column count: 3 cols for mobile, 4-5 cols for desktop
+      // Responsive columns: 2 cols for <= 6 items, 3 cols for <= 24 items, 4 cols for 25+
       const cols = count <= 6 ? 2 : (count <= 24 ? 3 : 4);
       const rows = Math.ceil(count / cols);
 
@@ -729,11 +751,11 @@
 
       const canvas = document.createElement('canvas');
       canvas.width = (cols * cellWidth) + (padding * 2);
-      canvas.height = (rows * cellHeight) + (padding * 2) + 60; // header space
+      canvas.height = (rows * cellHeight) + (padding * 2) + 60; // header banner space
 
       const ctx = canvas.getContext('2d');
 
-      // White Background
+      // White/slate background
       ctx.fillStyle = '#f8fafc';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -750,7 +772,7 @@
       ctx.textAlign = 'right';
       ctx.fillText(new Date().toLocaleDateString('vi-VN'), canvas.width - padding - 10, 38);
 
-      // Load and draw each card
+      // Draw each card
       for (let i = 0; i < count; i++) {
         const item = generatedItems[i];
         const col = i % cols;
@@ -778,11 +800,11 @@
 
         // Index Badge
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 12px sans-serif';
+        ctx.font = 'bold 12px monospace';
         ctx.textAlign = 'left';
         ctx.fillText(`#${i + 1}`, x + 12, y + 22);
 
-        // Draw QR
+        // Draw QR Image
         const img = new Image();
         img.src = item.dataUrl;
         await new Promise(r => { img.onload = r; });
@@ -791,11 +813,62 @@
         ctx.drawImage(img, x + 18, y + 30, qrDim, qrDim);
       }
 
-      // Download sheet image
-      canvas.toBlob((blob) => {
-        saveAs(blob, `Bang_Tong_Hop_QR_${new Date().toISOString().slice(0,10)}.png`);
-        showToast('Đã tải ảnh ghép lưới tổng hợp! Bạn có thể gửi ngay vào Zalo.');
-      });
+      return canvas;
+    }
+
+    // 2A. COPY SHEET IMAGE TO CLIPBOARD (Dán trực tiếp vào Zalo)
+    document.getElementById('btnCopySheet').addEventListener('click', async () => {
+      if (generatedItems.length === 0) return;
+
+      showToast('Đang tạo & sao chép ảnh lưới vào bộ nhớ tạm...');
+      try {
+        const canvas = await createSheetCanvas();
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            showToast('Không thể tạo ảnh, vui lòng thử lại', true);
+            return;
+          }
+          if (navigator.clipboard && navigator.clipboard.write) {
+            try {
+              await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+              ]);
+              showToast('✅ Đã copy ảnh lưới vào bộ nhớ tạm! Bạn có thể dán (Paste) ngay vào Zalo.');
+            } catch (clipErr) {
+              console.warn('Clipboard write error:', clipErr);
+              saveAs(blob, `Bang_Tong_Hop_QR_${new Date().toISOString().slice(0,10)}.png`);
+              showToast('Trình duyệt chặn sao chép, đã tự động tải ảnh về máy cho bạn.');
+            }
+          } else {
+            saveAs(blob, `Bang_Tong_Hop_QR_${new Date().toISOString().slice(0,10)}.png`);
+            showToast('Trình duyệt chưa hỗ trợ copy ảnh, đã tự động tải ảnh về máy.');
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        showToast('Có lỗi xảy ra khi tạo ảnh lưới', true);
+      }
+    });
+
+    // 2B. SAVE SHEET IMAGE TO DEVICE (Lưu file ảnh về máy)
+    document.getElementById('btnSaveSheet').addEventListener('click', async () => {
+      if (generatedItems.length === 0) return;
+
+      showToast('Đang tạo và lưu ảnh lưới về máy...');
+      try {
+        const canvas = await createSheetCanvas();
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            showToast('Không thể tạo ảnh, vui lòng thử lại', true);
+            return;
+          }
+          saveAs(blob, `Bang_Tong_Hop_QR_${new Date().toISOString().slice(0,10)}.png`);
+          showToast('✅ Đã lưu ảnh lưới tổng hợp về máy thành công!');
+        });
+      } catch (err) {
+        console.error(err);
+        showToast('Có lỗi xảy ra khi lưu ảnh', true);
+      }
     });
 
     // 3. EXPORT TO ZIP FILE
