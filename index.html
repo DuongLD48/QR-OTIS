@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tạo Mã QR Vận Đơn Hàng Loạt - Bulk QR Code Generator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            zalo: '#0068ff'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- QR Code Generator Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- JSZip for ZIP download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <style>
+    /* Custom styles for clean mobile touch experience */
+    .touch-callout-none {
+      -webkit-touch-callout: none;
+    }
+    /* Hide scrollbar for clean horizontal scrolling */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulse-once {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .animate-pop {
+      animation: pulse-once 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+          <i data-lucide="qr-code" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">QR Vận Đơn Pro</h1>
+          <p class="text-xs text-slate-500 font-medium">Tạo & Xuất QR hàng loạt cho Zalo / In ấn</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-1.5">
+        <button id="btnSample" type="button" class="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span class="hidden sm:inline">Nạp dữ liệu</span> mẫu
+        </button>
+        <button id="btnClear" type="button" class="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Xóa</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-4 sm:py-6 space-y-5">
+
+    <!-- Input Section -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <label for="inputCodes" class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+          <i data-lucide="list" class="w-4 h-4 text-indigo-600"></i>
+          Danh sách mã vận đơn
+          <span class="text-xs font-normal text-slate-500">(Mỗi mã 1 dòng)</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <span id="badgeCount" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+            0 mã hợp lệ
+          </span>
+          <button id="btnPaste" type="button" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1 bg-indigo-50/50 hover:bg-indigo-50 px-2 py-1 rounded-md transition">
+            <i data-lucide="clipboard-paste" class="w-3.5 h-3.5"></i>
+            Dán nhanh
+          </button>
+        </div>
+      </div>
+
+      <div class="relative">
+        <textarea id="inputCodes" rows="5" placeholder="Dán danh sách mã vào đây, ví dụ:&#10;VNPOST192837465&#10;SPX98273645210&#10;JT88239019234&#10;GHN77283918239..." class="w-full text-sm font-mono p-3.5 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition placeholder:text-slate-400 leading-relaxed bg-slate-50/50 focus:bg-white"></textarea>
+      </div>
+
+      <!-- Quick Toggles / Settings -->
+      <div class="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="chkShowLabel" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+          <span>In kèm chữ mã vận đơn dưới hình QR</span>
+        </label>
+        <div class="flex items-center justify-between sm:justify-end gap-2">
+          <span class="text-slate-500">Độ phân giải QR:</span>
+          <select id="selectQrSize" class="bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <option value="160">Chuẩn (160px)</option>
+            <option value="220" selected>Rõ nét (220px - Khuyên dùng)</option>
+            <option value="300">Cực nét (300px - Cho in ấn)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Button Generate -->
+      <button id="btnGenerate" type="button" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 hover:from-indigo-700 hover:to-violet-800 text-white font-bold text-sm sm:text-base flex items-center justify-center space-x-2 shadow-lg shadow-indigo-200 active:scale-[0.99] transition transform cursor-pointer">
+        <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+        <span>TẠO MÃ QR NGAY</span>
+      </button>
+    </div>
+
+    <!-- Export & Bulk Action Toolbar (Hidden when no items) -->
+    <div id="exportToolbar" class="hidden bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+            <span>Đã tạo xong <span id="readyCount" class="text-amber-300 font-extrabold">0</span> mã QR</span>
+          </h2>
+          <p class="text-xs text-slate-300 mt-0.5">Chọn phương thức xuất phù hợp cho quy mô 100 đơn/ngày của bạn</p>
+        </div>
+      </div>
+
+      <!-- Export Grid Options -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <!-- Export PDF -->
+        <button id="btnExportPDF" type="button" class="group flex flex-col items-start p-3 bg-white/10 hover:bg-white/20 active:bg-white/25 rounded-xl border border-white/10 transition text-left cursor-pointer">
+          <div class="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm mb-1">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>Xuất File PDF In Ấn</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-snug">Dàn trang A4 (4x6 mã/trang) kèm viền cắt. Tiện in tem hoặc gửi file qua Zalo.</p>
+        </button>
+
+        <!-- Export Grid Image (Sheet) -->
+        <button id="btnExportSheet" type="button" class="group flex flex-col items-start p-3 bg-white/10 hover:bg-white/20 active:bg-white/25 rounded-xl border border-white/10 transition text-left cursor-pointer">
+          <div class="flex items-center gap-2 text-emerald-300 font-bold text-xs sm:text-sm mb-1">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            <span>Tạo 1 Ảnh Lưới Tổng Hợp</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-snug">Ghép tất cả mã thành 1 ảnh duy nhất để gửi ngay 1 tin nhắn vào Zalo.</p>
+        </button>
+
+        <!-- Export ZIP -->
+        <button id="btnExportZIP" type="button" class="group flex flex-col items-start p-3 bg-white/10 hover:bg-white/20 active:bg-white/25 rounded-xl border border-white/10 transition text-left cursor-pointer">
+          <div class="flex items-center gap-2 text-sky-300 font-bold text-xs sm:text-sm mb-1">
+            <i data-lucide="archive" class="w-4 h-4"></i>
+            <span>Tải File Nén ZIP</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-snug">Chứa tất cả các ảnh QR riêng biệt đặt tên theo từng mã vận đơn.</p>
+        </button>
+      </div>
+    </div>
+
+    <!-- QR Results List Section -->
+    <div id="resultsContainer" class="hidden space-y-4">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+          <i data-lucide="grid" class="w-4 h-4 text-indigo-600"></i>
+          Danh sách chi tiết từng mã QR
+        </h3>
+        <span class="text-xs text-slate-500 italic">Chạm vào ảnh để phóng to / tải riêng</span>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="qrGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
+      <div class="w-14 h-14 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="scan-line" class="w-7 h-7"></i>
+      </div>
+      <h3 class="text-sm font-semibold text-slate-800">Chưa có mã QR nào được tạo</h3>
+      <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">Dán danh sách mã vận đơn của bạn vào khung phía trên và nhấn "Tạo mã QR ngay".</p>
+    </div>
+
+  </main>
+
+  <!-- Modal Preview Single QR -->
+  <div id="modalPreview" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 text-center shadow-2xl space-y-4 transform transition-all animate-pop">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Chi tiết mã QR</span>
+        <button id="btnCloseModal" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modalQrImgWrapper" class="flex justify-center p-2 bg-slate-50 rounded-xl border border-slate-100">
+        <!-- Rendered Image -->
+      </div>
+      <div class="space-y-1">
+        <p id="modalCodeText" class="text-sm font-mono font-bold text-indigo-700 break-all select-all"></p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button id="btnModalCopyText" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>Sao chép mã</span>
+        </button>
+        <button id="btnModalDownload" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-100 cursor-pointer">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Tải ảnh về</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
+    <i data-lucide="check" class="w-4 h-4 text-emerald-400" id="toastIcon"></i>
+    <span id="toastMsg">Đã sao chép</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>Ứng dụng chạy trực tiếp trên trình duyệt - 100% bảo mật & riêng tư.</p>
+      <p class="text-slate-400">Tối ưu cho 100+ đơn/ngày • Hỗ trợ Zalo & In ấn</p>
+    </div>
+  </footer>
+
+  <!-- Hidden Container for generating QR Offscreen -->
+  <div id="offscreenContainer" class="hidden"></div>
+
+  <!-- Main JavaScript Logic -->
+  <script>
+    // State management
+    let generatedItems = []; // Array of { code: string, dataUrl: string, canvas: HTMLCanvasElement }
+
+    // DOM Elements
+    const inputCodes = document.getElementById('inputCodes');
+    const badgeCount = document.getElementById('badgeCount');
+    const btnPaste = document.getElementById('btnPaste');
+    const btnSample = document.getElementById('btnSample');
+    const btnClear = document.getElementById('btnClear');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const chkShowLabel = document.getElementById('chkShowLabel');
+    const selectQrSize = document.getElementById('selectQrSize');
+    const exportToolbar = document.getElementById('exportToolbar');
+    const readyCount = document.getElementById('readyCount');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const qrGrid = document.getElementById('qrGrid');
+    const emptyState = document.getElementById('emptyState');
+    const offscreenContainer = document.getElementById('offscreenContainer');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    
+    // Modal Elements
+    const modalPreview = document.getElementById('modalPreview');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    const modalQrImgWrapper = document.getElementById('modalQrImgWrapper');
+    const modalCodeText = document.getElementById('modalCodeText');
+    const btnModalCopyText = document.getElementById('btnModalCopyText');
+    const btnModalDownload = document.getElementById('btnModalDownload');
+    let currentModalItem = null;
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Show Toast Helper
+    function showToast(message, isError = false) {
+      toastMsg.textContent = message;
+      toast.classList.remove('opacity-0', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      if (isError) {
+        toast.classList.add('bg-red-900/90');
+      } else {
+        toast.classList.remove('bg-red-900/90');
+      }
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2400);
+    }
+
+    // Parse Tracking Codes
+    function parseInputCodes(text) {
+      if (!text) return [];
+      return text
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    }
+
+    // Update real-time counter
+    function updateCounter() {
+      const codes = parseInputCodes(inputCodes.value);
+      badgeCount.textContent = `${codes.length} mã hợp lệ`;
+      if (codes.length > 0) {
+        badgeCount.classList.remove('bg-slate-100', 'text-slate-600');
+        badgeCount.classList.add('bg-indigo-50', 'text-indigo-700');
+      } else {
+        badgeCount.classList.remove('bg-indigo-50', 'text-indigo-700');
+        badgeCount.classList.add('bg-slate-100', 'text-slate-600');
+      }
+      // Save input to localStorage
+      try {
+        localStorage.setItem('saved_qr_input', inputCodes.value);
+      } catch (e) {}
+    }
+
+    inputCodes.addEventListener('input', updateCounter);
+
+    // Restore from localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const saved = localStorage.getItem('saved_qr_input');
+        if (saved) {
+          inputCodes.value = saved;
+          updateCounter();
+        }
+      } catch(e) {}
+    });
+
+    // Paste Quick Button
+    btnPaste.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          if (inputCodes.value.trim().length > 0) {
+            inputCodes.value += '\n' + text;
+          } else {
+            inputCodes.value = text;
+          }
+          updateCounter();
+          showToast('Đã dán từ bộ nhớ tạm');
+        }
+      } catch (err) {
+        inputCodes.focus();
+        showToast('Vui lòng cấp quyền dán hoặc dán thủ công', true);
+      }
+    });
+
+    // Clear Button
+    btnClear.addEventListener('click', () => {
+      inputCodes.value = '';
+      updateCounter();
+      generatedItems = [];
+      resultsContainer.classList.add('hidden');
+      exportToolbar.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      qrGrid.innerHTML = '';
+      showToast('Đã xóa danh sách');
+    });
+
+    // Sample Data Button
+    btnSample.addEventListener('click', () => {
+      const sampleCodes = [
+        'VNPOST982347102VN',
+        'SPX738291048201A',
+        'JT8392019482019',
+        'GHN284910284710',
+        'GHTK89201948201',
+        'BEST82910482910',
+        'NJV829104820194',
+        'EMS729104829102',
+        'VIETTEL92019481',
+        'LAZ920194820192',
+        'TIKI82910482019',
+        'FLASH8291048201'
+      ];
+      inputCodes.value = sampleCodes.join('\n');
+      updateCounter();
+      showToast('Đã nạp 12 mã vận đơn mẫu');
+      generateAllQRCodes();
+    });
+
+    // Create a QR Code Canvas element with optional text label below
+    function createQrCanvas(text, size = 220, showLabel = true) {
+      return new Promise((resolve) => {
+        const tempDiv = document.createElement('div');
+        offscreenContainer.appendChild(tempDiv);
+
+        new QRCode(tempDiv, {
+          text: text,
+          width: size,
+          height: size,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+
+        // QRCode.js creates an img or canvas inside tempDiv
+        setTimeout(() => {
+          const rawCanvas = tempDiv.querySelector('canvas');
+          let sourceCanvas = rawCanvas;
+
+          // If library outputted an img instead of canvas
+          if (!sourceCanvas) {
+            const rawImg = tempDiv.querySelector('img');
+            sourceCanvas = document.createElement('canvas');
+            sourceCanvas.width = size;
+            sourceCanvas.height = size;
+            const ctx = sourceCanvas.getContext('2d');
+            ctx.drawImage(rawImg, 0, 0, size, size);
+          }
+
+          // Create final polished canvas (with border & text if enabled)
+          const padding = 16;
+          const textHeight = showLabel ? 32 : 0;
+          const finalCanvas = document.createElement('canvas');
+          finalCanvas.width = size + (padding * 2);
+          finalCanvas.height = size + (padding * 2) + textHeight;
+
+          const ctx = finalCanvas.getContext('2d');
+
+          // White background
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+          // Draw QR in center
+          ctx.drawImage(sourceCanvas, padding, padding, size, size);
+
+          // Draw Text below QR
+          if (showLabel) {
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Format text if too long
+            const displayCode = text.length > 22 ? text.substring(0, 20) + '...' : text;
+            ctx.fillText(displayCode, finalCanvas.width / 2, size + padding + (textHeight / 2));
+          }
+
+          const dataUrl = finalCanvas.toDataURL('image/png');
+          tempDiv.remove();
+
+          resolve({
+            code: text,
+            dataUrl: dataUrl,
+            canvas: finalCanvas
+          });
+        }, 60);
+      });
+    }
+
+    // Main Generate Handler
+    async function generateAllQRCodes() {
+      const codes = parseInputCodes(inputCodes.value);
+      if (codes.length === 0) {
+        showToast('Vui lòng nhập ít nhất 1 mã vận đơn', true);
+        return;
+      }
+
+      btnGenerate.disabled = true;
+      btnGenerate.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Đang xử lý ${codes.length} mã...</span>`;
+      lucide.createIcons();
+
+      const qrSize = parseInt(selectQrSize.value, 10) || 220;
+      const showLabel = chkShowLabel.checked;
+
+      generatedItems = [];
+      qrGrid.innerHTML = '';
+      offscreenContainer.innerHTML = '';
+
+      // Process in batches for smooth UI
+      for (let i = 0; i < codes.length; i++) {
+        const item = await createQrCanvas(codes[i], qrSize, showLabel);
+        generatedItems.push(item);
+      }
+
+      // Render items to grid
+      renderGridItems(generatedItems);
+
+      // Show action bar & results
+      readyCount.textContent = generatedItems.length;
+      exportToolbar.classList.remove('hidden');
+      resultsContainer.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+
+      btnGenerate.disabled = false;
+      btnGenerate.innerHTML = `<i data-lucide="play" class="w-5 h-5 fill-current"></i><span>TẠO MÃ QR NGAY (${generatedItems.length} MÃ)</span>`;
+      lucide.createIcons();
+
+      showToast(`Đã tạo thành công ${generatedItems.length} mã QR!`);
+    }
+
+    btnGenerate.addEventListener('click', generateAllQRCodes);
+
+    // Render Grid Cards
+    function renderGridItems(items) {
+      qrGrid.innerHTML = '';
+
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-3 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col items-center justify-between group';
+        
+        card.innerHTML = `
+          <div class="w-full flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5 px-0.5">
+            <span>#${index + 1}</span>
+            <button class="btn-copy-code text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5 cursor-pointer" title="Copy mã">
+              <i data-lucide="copy" class="w-3 h-3"></i> Copy
+            </button>
+          </div>
+          
+          <div class="cursor-pointer my-1 rounded-xl p-1 bg-slate-50 border border-slate-100 hover:scale-105 transition transform qr-preview-img">
+            <img src="${item.dataUrl}" alt="QR ${item.code}" class="w-full h-auto object-contain max-w-[170px] rounded-lg">
+          </div>
+
+          <div class="w-full mt-2 space-y-2">
+            <p class="text-xs font-mono font-bold text-slate-800 text-center truncate" title="${item.code}">${item.code}</p>
+            
+            <div class="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-100">
+              <button class="btn-copy-img w-full py-1.5 px-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-semibold rounded-lg flex items-center justify-center gap-1 transition cursor-pointer" title="Copy ảnh để dán vào Zalo">
+                <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                <span>Zalo</span>
+              </button>
+              <button class="btn-download-single w-full py-1.5 px-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg flex items-center justify-center gap-1 transition cursor-pointer" title="Tải ảnh">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>Tải</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Card Events
+        const imgEl = card.querySelector('.qr-preview-img');
+        imgEl.addEventListener('click', () => openModal(item));
+
+        const btnCopyCode = card.querySelector('.btn-copy-code');
+        btnCopyCode.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navigator.clipboard.writeText(item.code);
+          showToast(`Đã chép mã: ${item.code}`);
+        });
+
+        const btnCopyImg = card.querySelector('.btn-copy-img');
+        btnCopyImg.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await copyImageToClipboard(item);
+        });
+
+        const btnDownloadSingle = card.querySelector('.btn-download-single');
+        btnDownloadSingle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          downloadSingleQr(item);
+        });
+
+        qrGrid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Modal Preview Handler
+    function openModal(item) {
+      currentModalItem = item;
+      modalQrImgWrapper.innerHTML = `<img src="${item.dataUrl}" class="max-w-[240px] w-full rounded-lg shadow-sm">`;
+      modalCodeText.textContent = item.code;
+      modalPreview.classList.remove('hidden');
+      modalPreview.classList.add('flex');
+    }
+
+    function closeModal() {
+      modalPreview.classList.add('hidden');
+      modalPreview.classList.remove('flex');
+      currentModalItem = null;
+    }
+
+    btnCloseModal.addEventListener('click', closeModal);
+    modalPreview.addEventListener('click', (e) => {
+      if (e.target === modalPreview) closeModal();
+    });
+
+    btnModalCopyText.addEventListener('click', () => {
+      if (currentModalItem) {
+        navigator.clipboard.writeText(currentModalItem.code);
+        showToast(`Đã chép: ${currentModalItem.code}`);
+      }
+    });
+
+    btnModalDownload.addEventListener('click', () => {
+      if (currentModalItem) {
+        downloadSingleQr(currentModalItem);
+      }
+    });
+
+    // Copy Image to Clipboard (For Zalo dán trực tiếp)
+    async function copyImageToClipboard(item) {
+      try {
+        const response = await fetch(item.dataUrl);
+        const blob = await response.blob();
+        if (navigator.clipboard && navigator.clipboard.write) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+          showToast('Đã copy ảnh! Bạn có thể dán (Paste) ngay vào Zalo');
+        } else {
+          // Fallback if browser doesn't support clipboard image write
+          downloadSingleQr(item);
+          showToast('Trình duyệt chưa hỗ trợ copy ảnh trực tiếp, đã tự động tải về');
+        }
+      } catch (err) {
+        console.error(err);
+        downloadSingleQr(item);
+        showToast('Đã tải ảnh về để bạn gửi Zalo');
+      }
+    }
+
+    // Download Single QR Image
+    function downloadSingleQr(item) {
+      const a = document.createElement('a');
+      a.href = item.dataUrl;
+      a.download = `QR_${item.code.replace(/[^a-zA-Z0-9_-]/g, '_')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast(`Đã tải: ${item.code}.png`);
+    }
+
+    // 1. EXPORT TO PDF (A4 Grid / Print-Ready)
+    document.getElementById('btnExportPDF').addEventListener('click', async () => {
+      if (generatedItems.length === 0) return;
+
+      showToast('Đang tạo file PDF in ấn...');
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // A4 dimensions: 210mm x 297mm
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 10;
+      const cols = 4; // 4 columns
+      const rows = 6; // 6 rows = 24 QR codes per A4 sheet
+      const itemsPerPage = cols * rows;
+
+      const cellWidth = (pageWidth - (margin * 2)) / cols; // ~47.5mm
+      const cellHeight = (pageHeight - (margin * 2) - 10) / rows; // ~44.5mm
+      const qrImgSize = 34; // 34mm square for QR
+
+      let pageIndex = 1;
+      let totalPages = Math.ceil(generatedItems.length / itemsPerPage);
+
+      for (let i = 0; i < generatedItems.length; i++) {
+        if (i > 0 && i % itemsPerPage === 0) {
+          doc.addPage();
+          pageIndex++;
+        }
+
+        const item = generatedItems[i];
+        const pageItemIndex = i % itemsPerPage;
+        const colIndex = pageItemIndex % cols;
+        const rowIndex = Math.floor(pageItemIndex / cols);
+
+        const x = margin + (colIndex * cellWidth);
+        const y = margin + (rowIndex * cellHeight);
+
+        // Draw dotted cutting border
+        doc.setDrawColor(210, 215, 220);
+        doc.setLineDashPattern([1.5, 1.5], 0);
+        doc.rect(x, y, cellWidth, cellHeight);
+        doc.setLineDashPattern([], 0); // reset
+
+        // Draw QR Image
+        const qrX = x + ((cellWidth - qrImgSize) / 2);
+        const qrY = y + 3;
+        doc.addImage(item.dataUrl, 'PNG', qrX, qrY, qrImgSize, qrImgSize, undefined, 'FAST');
+
+        // Draw Code Text
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(30, 41, 59);
+        const textY = y + cellHeight - 3;
+        const textX = x + (cellWidth / 2);
+        
+        let labelText = item.code;
+        if (labelText.length > 20) {
+          labelText = labelText.substring(0, 18) + '..';
+        }
+        doc.text(labelText, textX, textY, { align: 'center' });
+      }
+
+      const fileName = `Danh_Sach_QR_Van_Don_${new Date().toISOString().slice(0,10)}.pdf`;
+      doc.save(fileName);
+      showToast(`Đã xuất PDF thành công (${totalPages} trang)`);
+    });
+
+    // 2. EXPORT TO SHEET IMAGE (Single Large Grid Image for 1-click Zalo share)
+    document.getElementById('btnExportSheet').addEventListener('click', async () => {
+      if (generatedItems.length === 0) return;
+
+      showToast('Đang ghép ảnh dạng lưới...');
+
+      const count = generatedItems.length;
+      // Calculate best column count: 3 cols for mobile, 4-5 cols for desktop
+      const cols = count <= 6 ? 2 : (count <= 24 ? 3 : 4);
+      const rows = Math.ceil(count / cols);
+
+      const cellWidth = 260;
+      const cellHeight = 290;
+      const padding = 20;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = (cols * cellWidth) + (padding * 2);
+      canvas.height = (rows * cellHeight) + (padding * 2) + 60; // header space
+
+      const ctx = canvas.getContext('2d');
+
+      // White Background
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Header Banner
+      ctx.fillStyle = '#4f46e5';
+      ctx.fillRect(0, 0, canvas.width, 60);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+      ctx.textAlign = 'left';
+      ctx.fillText(`DANH SÁCH MÃ QR VẬN ĐƠN (${count} ĐƠN)`, padding + 10, 38);
+
+      ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+      ctx.textAlign = 'right';
+      ctx.fillText(new Date().toLocaleDateString('vi-VN'), canvas.width - padding - 10, 38);
+
+      // Load and draw each card
+      for (let i = 0; i < count; i++) {
+        const item = generatedItems[i];
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+
+        const x = padding + (col * cellWidth) + 8;
+        const y = 60 + padding + (row * cellHeight) + 8;
+        const cardW = cellWidth - 16;
+        const cardH = cellHeight - 16;
+
+        // Card Background
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0,0,0,0.06)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
+        ctx.beginPath();
+        ctx.roundRect(x, y, cardW, cardH, 12);
+        ctx.fill();
+        ctx.shadowColor = 'transparent'; // reset
+
+        // Card Border
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Index Badge
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`#${i + 1}`, x + 12, y + 22);
+
+        // Draw QR
+        const img = new Image();
+        img.src = item.dataUrl;
+        await new Promise(r => { img.onload = r; });
+
+        const qrDim = cardW - 36;
+        ctx.drawImage(img, x + 18, y + 30, qrDim, qrDim);
+      }
+
+      // Download sheet image
+      canvas.toBlob((blob) => {
+        saveAs(blob, `Bang_Tong_Hop_QR_${new Date().toISOString().slice(0,10)}.png`);
+        showToast('Đã tải ảnh ghép lưới tổng hợp! Bạn có thể gửi ngay vào Zalo.');
+      });
+    });
+
+    // 3. EXPORT TO ZIP FILE
+    document.getElementById('btnExportZIP').addEventListener('click', async () => {
+      if (generatedItems.length === 0) return;
+
+      showToast('Đang nén file ZIP...');
+      const zip = new JSZip();
+      const folder = zip.folder("Ma_QR_Van_Don");
+
+      generatedItems.forEach((item, idx) => {
+        // Remove base64 header
+        const base64Data = item.dataUrl.replace(/^data:image\/png;base64,/, "");
+        const safeName = `${String(idx + 1).padStart(3, '0')}_${item.code.replace(/[^a-zA-Z0-9_-]/g, '_')}.png`;
+        folder.file(safeName, base64Data, { base64: true });
+      });
+
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, `Danh_Sach_QR_${new Date().toISOString().slice(0,10)}.zip`);
+      showToast('Đã tải file ZIP thành công!');
+    });
+  </script>
+</body>
+</html>
