@@ -36,8 +36,7 @@
   <!-- jsPDF for PDF generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- JSZip for ZIP download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- FileSaver for image saving -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
   <style>
@@ -123,11 +122,11 @@
           <span>In kèm chữ mã vận đơn dưới hình QR</span>
         </label>
         <div class="flex items-center justify-between sm:justify-end gap-2">
-          <span class="text-slate-500">Độ phân giải QR:</span>
+          <span class="text-slate-500">Kích thước QR:</span>
           <select id="selectQrSize" class="bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
-            <option value="160">Chuẩn (160px)</option>
-            <option value="220" selected>Rõ nét (220px - Khuyên dùng)</option>
-            <option value="300">Cực nét (300px - Cho in ấn)</option>
+            <option value="120" selected>Nhỏ nhất (120px - Độ chịu lỗi Level H cao nhất)</option>
+            <option value="160">Tiêu chuẩn (160px)</option>
+            <option value="200">Lớn (200px)</option>
           </select>
         </div>
       </div>
@@ -145,66 +144,51 @@
         <div>
           <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
             <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
-            <span>Đã tạo xong <span id="readyCount" class="text-amber-300 font-extrabold">0</span> mã QR</span>
+            <span>Đã tạo xong <span id="readyCount" class="text-amber-300 font-extrabold">0</span> mã QR (Độ chịu lỗi Level H)</span>
           </h2>
-          <p class="text-xs text-slate-300 mt-0.5">Chọn phương thức xuất phù hợp cho quy mô 100 đơn/ngày của bạn</p>
+          <p class="text-xs text-slate-300 mt-0.5">Chọn xuất File PDF in ấn hoặc Ảnh Lưới gửi trực tiếp Zalo</p>
         </div>
       </div>
 
-      <!-- Export Grid Options -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <!-- Export Grid Options (2 Options: PDF & Sheet Image) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <!-- Export PDF -->
-        <button id="btnExportPDF" type="button" class="group flex flex-col justify-between p-3.5 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-xl border border-white/10 transition text-left cursor-pointer">
+        <button id="btnExportPDF" type="button" class="group flex flex-col justify-between p-4 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-xl border border-white/10 transition text-left cursor-pointer">
           <div>
-            <div class="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm mb-1">
+            <div class="flex items-center gap-2 text-amber-300 font-bold text-sm mb-1.5">
               <i data-lucide="file-text" class="w-4 h-4"></i>
-              <span>Xuất File PDF In Ấn</span>
+              <span>Xuất File PDF In Ấn (A4)</span>
             </div>
-            <p class="text-[11px] text-slate-300 leading-snug">Dàn trang A4 (4x6 = 24 mã/trang) kèm viền cắt. Rất tiện in tem hoặc gửi file qua Zalo.</p>
+            <p class="text-xs text-slate-300 leading-relaxed">Tự động dàn trang khổ A4 kèm viền cắt và mã chữ bên dưới. Rất tiện in tem nhãn hoặc gửi file tài liệu qua Zalo.</p>
           </div>
-          <div class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-300">
-            <span>Tải file PDF</span>
-            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+          <div class="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-lg w-fit border border-amber-500/20">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Tải file PDF A4</span>
           </div>
         </button>
 
         <!-- Export Grid Image (Sheet) with 2 sub-actions -->
-        <div class="flex flex-col justify-between p-3.5 bg-white/10 rounded-xl border border-emerald-500/30 ring-1 ring-emerald-500/20">
+        <div class="flex flex-col justify-between p-4 bg-white/10 rounded-xl border border-emerald-500/30 ring-1 ring-emerald-500/20">
           <div>
-            <div class="flex items-center gap-2 text-emerald-300 font-bold text-xs sm:text-sm mb-1">
+            <div class="flex items-center gap-2 text-emerald-300 font-bold text-sm mb-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4"></i>
-              <span>Ảnh Lưới Tổng Hợp</span>
+              <span>Ảnh Lưới Tổng Hợp (Gửi Zalo)</span>
             </div>
-            <p class="text-[11px] text-slate-300 leading-snug">Ghép 100 mã thành 1 ảnh bảng duy nhất gửi vào Zalo.</p>
+            <p class="text-xs text-slate-300 leading-relaxed">Ghép toàn bộ mã QR thành 1 bức ảnh duy nhất để gửi nhanh vào Zalo.</p>
           </div>
           
           <!-- 2 Action Buttons: Copy to Clipboard & Save to Device -->
-          <div class="grid grid-cols-2 gap-2 mt-3">
-            <button id="btnCopySheet" type="button" class="py-2 px-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer" title="Copy ảnh trực tiếp vào bộ nhớ đệm để dán vào Zalo">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <button id="btnCopySheet" type="button" class="py-2.5 px-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer" title="Copy ảnh trực tiếp vào bộ nhớ đệm để dán vào Zalo">
+              <i data-lucide="copy" class="w-4 h-4"></i>
               <span>Copy Zalo</span>
             </button>
-            <button id="btnSaveSheet" type="button" class="py-2 px-2 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer" title="Lưu file ảnh về máy">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <button id="btnSaveSheet" type="button" class="py-2.5 px-2 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer" title="Lưu file ảnh về máy">
+              <i data-lucide="download" class="w-4 h-4"></i>
               <span>Lưu ảnh</span>
             </button>
           </div>
         </div>
-
-        <!-- Export ZIP -->
-        <button id="btnExportZIP" type="button" class="group flex flex-col justify-between p-3.5 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-xl border border-white/10 transition text-left cursor-pointer">
-          <div>
-            <div class="flex items-center gap-2 text-sky-300 font-bold text-xs sm:text-sm mb-1">
-              <i data-lucide="archive" class="w-4 h-4"></i>
-              <span>Tải File Nén ZIP</span>
-            </div>
-            <p class="text-[11px] text-slate-300 leading-snug">Chứa tất cả các ảnh QR riêng biệt đặt tên theo từng mã vận đơn.</p>
-          </div>
-          <div class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-300">
-            <span>Tải file ZIP</span>
-            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
-          </div>
-        </button>
       </div>
     </div>
 
@@ -424,7 +408,8 @@
     });
 
     // Create a QR Code Canvas element with optional text label below
-    function createQrCanvas(text, size = 220, showLabel = true) {
+    // Create a QR Code Canvas element with highest error correction level (Level H)
+    function createQrCanvas(text, size = 120, showLabel = true) {
       return new Promise((resolve) => {
         const tempDiv = document.createElement('div');
         offscreenContainer.appendChild(tempDiv);
@@ -435,7 +420,7 @@
           height: size,
           colorDark: "#000000",
           colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.M
+          correctLevel: QRCode.CorrectLevel.H // Cấp độ chịu lỗi cao nhất (Level H - phục hồi ~30% lỗi/mờ)
         });
 
         // QRCode.js creates an img or canvas inside tempDiv
@@ -453,9 +438,9 @@
             ctx.drawImage(rawImg, 0, 0, size, size);
           }
 
-          // Create final polished canvas (with border & text if enabled)
-          const padding = 16;
-          const textHeight = showLabel ? 32 : 0;
+          // Create compact polished canvas (with border & text if enabled)
+          const padding = 8; // Viền siêu nhỏ gọn
+          const textHeight = showLabel ? 26 : 0;
           const finalCanvas = document.createElement('canvas');
           finalCanvas.width = size + (padding * 2);
           finalCanvas.height = size + (padding * 2) + textHeight;
@@ -472,7 +457,7 @@
           // Draw Text below QR
           if (showLabel) {
             ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace';
+            ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
@@ -489,7 +474,7 @@
             dataUrl: dataUrl,
             canvas: finalCanvas
           });
-        }, 60);
+        }, 50);
       });
     }
 
@@ -869,26 +854,6 @@
         console.error(err);
         showToast('Có lỗi xảy ra khi lưu ảnh', true);
       }
-    });
-
-    // 3. EXPORT TO ZIP FILE
-    document.getElementById('btnExportZIP').addEventListener('click', async () => {
-      if (generatedItems.length === 0) return;
-
-      showToast('Đang nén file ZIP...');
-      const zip = new JSZip();
-      const folder = zip.folder("Ma_QR_Van_Don");
-
-      generatedItems.forEach((item, idx) => {
-        // Remove base64 header
-        const base64Data = item.dataUrl.replace(/^data:image\/png;base64,/, "");
-        const safeName = `${String(idx + 1).padStart(3, '0')}_${item.code.replace(/[^a-zA-Z0-9_-]/g, '_')}.png`;
-        folder.file(safeName, base64Data, { base64: true });
-      });
-
-      const content = await zip.generateAsync({ type: "blob" });
-      saveAs(content, `Danh_Sach_QR_${new Date().toISOString().slice(0,10)}.zip`);
-      showToast('Đã tải file ZIP thành công!');
     });
   </script>
 </body>
